@@ -94,12 +94,14 @@ static void Echo_ISR(void *pArg)
     {
         /* Rising edge: Echo 신호 시작 */
         sEchoStart = Pmu_ReadCycleCounter();
+        mcu_printf("!\r\n");
     }
     else
     {
         /* Falling edge: Echo 신호 종료 */
         sEchoEnd  = Pmu_ReadCycleCounter();
         sEchoDone = 1U;
+        mcu_printf(".\r\n");
     }
 }
 
@@ -112,34 +114,42 @@ static void Echo_ISR(void *pArg)
  * ----------------------------------------------------------------------- */
 void Hcsr04_Init(void)
 {
+    SALRetCode_t ret;
+    uint32       echoVal;
+
     /* 1. Trig: OUTPUT */
     GPIO_Config(HCSR04_TRIG_PIN,
                 GPIO_FUNC(0UL) | GPIO_OUTPUT | GPIO_NOPULL | GPIO_DS(3UL));
     GPIO_Set(HCSR04_TRIG_PIN, 0UL);
 
-    /* 2. Echo: INPUT, 풀다운 (핀 플로팅 방지) */
+    /* 2. Echo: INPUT, 풀다운 */
     GPIO_Config(HCSR04_ECHO_PIN,
                 GPIO_FUNC(0UL) | GPIO_INPUT | GPIO_INPUTBUF_EN | GPIO_PULLDN);
 
-    /* 3. PMU cycle counter 활성화 */
+    /* 3. Echo 핀 초기 레벨 확인 — 0이어야 정상 (HC-SR04 idle = LOW) */
+    echoVal = GPIO_Get(HCSR04_ECHO_PIN);
+    mcu_printf("[HCSR04] Echo pin idle level = %d (expect 0)\r\n", (int)echoVal);
+
+    /* 4. PMU cycle counter 활성화 */
     Pmu_EnableCycleCounter();
 
-    /* 4. Echo ISR 등록
-     *    GPIO_IntExtSet : Echo 핀을 GIC_EXT0 외부 인터럽트 소스로 연결
-     *    GIC_IntVectSet : ISR 함수 등록, EDGE_BOTH = rising + falling 모두
-     *    GIC_IntSrcEn   : 인터럽트 소스 활성화
-     */
-    (void)GPIO_IntExtSet(HCSR04_ECHO_GIC_INT, HCSR04_ECHO_PIN);
+    /* 5. GPIO_IntExtSet — Echo 핀을 GIC_EXT0 소스로 연결 */
+    ret = GPIO_IntExtSet(HCSR04_ECHO_GIC_INT, HCSR04_ECHO_PIN);
+    mcu_printf("[HCSR04] GPIO_IntExtSet ret=%d (expect 0=OK)\r\n", (int)ret);
 
-    (void)GIC_IntVectSet(HCSR04_ECHO_GIC_INT,
+    /* 6. GIC_IntVectSet — ISR 등록 (EDGE_BOTH → 내부적으로 IRQ 2개 등록) */
+    ret = GIC_IntVectSet(HCSR04_ECHO_GIC_INT,
                          GIC_PRIORITY_NO_MEAN,
                          GIC_INT_TYPE_EDGE_BOTH,
                          (GICIsrFunc)&Echo_ISR,
                          (void *)0);
+    mcu_printf("[HCSR04] GIC_IntVectSet ret=%d (expect 0=OK)\r\n", (int)ret);
 
-    (void)GIC_IntSrcEn(HCSR04_ECHO_GIC_INT);
+    /* 7. GIC_IntSrcEn — rising용 IRQ 활성화 */
+    ret = GIC_IntSrcEn(HCSR04_ECHO_GIC_INT);
+    mcu_printf("[HCSR04] GIC_IntSrcEn(EXT0) ret=%d (expect 0=OK)\r\n", (int)ret);
 
-    mcu_printf("[HCSR04] Init done. TRIG=GPB(20), ECHO=GPB(21), GIC=EXT0\r\n");
+    mcu_printf("[HCSR04] Init done. TRIG=GPA(21), ECHO=GPA(22)\r\n");
 }
 
 /* -----------------------------------------------------------------------
@@ -167,6 +177,8 @@ void Hcsr04_CollisionAvoidTask(void *pArg)
     boolean  isCollisionActive = FALSE;
 
     (void)pArg;
+
+    Hcsr04_Init();
 
     for (;;)
     {

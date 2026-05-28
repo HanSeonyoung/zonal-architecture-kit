@@ -260,7 +260,7 @@ void EmergencySignalTask(void *pvParameters)
                 ControlSignalLight(FALSE, TRUE);
             }
             else if (recvBuf[0] == VCP_IO_ACTION_OFF) 
-            {
+            {     
                 isEmergencyActive = FALSE;
                 bLedState = FALSE;
                 ControlSignalLight(TRUE, FALSE);

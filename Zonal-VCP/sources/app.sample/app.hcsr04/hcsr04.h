@@ -21,8 +21,8 @@
  *   ECHO : INPUT + 외부 인터럽트 필요. GPIO_IntExtSet 지원 핀이어야 함.
  *          지원 핀 목록: GPIO_GPA(0-30), GPB(0-28), GPC(0-27), GPK(0-17)
  * ----------------------------------------------------------------------- */
-#define HCSR04_TRIG_PIN         GPIO_GPB(20UL)  /* TODO: 배선 후 수정 */
-#define HCSR04_ECHO_PIN         GPIO_GPB(21UL)  /* TODO: 배선 후 수정 */
+#define HCSR04_TRIG_PIN         GPIO_GPA(0UL)  /* TODO: 배선 후 수정 */
+#define HCSR04_ECHO_PIN         GPIO_GPA(1UL)  /* TODO: 배선 후 수정 */
 #define HCSR04_ECHO_GIC_INT     GIC_EXT0        /* Echo ISR 사용할 GIC 외부 인터럽트 번호 */
 
 /* -----------------------------------------------------------------------
@@ -46,7 +46,7 @@
 #define HCSR04_CPU_MHZ          (300UL)
 
 /* -----------------------------------------------------------------------
- * [공개 API]
+ * [공개 API]s
  * ----------------------------------------------------------------------- */
 
 /*
