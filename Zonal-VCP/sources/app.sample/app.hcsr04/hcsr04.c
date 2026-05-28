@@ -94,14 +94,12 @@ static void Echo_ISR(void *pArg)
     {
         /* Rising edge: Echo 신호 시작 */
         sEchoStart = Pmu_ReadCycleCounter();
-        mcu_printf("!\r\n");
     }
     else
     {
         /* Falling edge: Echo 신호 종료 */
         sEchoEnd  = Pmu_ReadCycleCounter();
         sEchoDone = 1U;
-        mcu_printf(".\r\n");
     }
 }
 
@@ -149,7 +147,7 @@ void Hcsr04_Init(void)
     ret = GIC_IntSrcEn(HCSR04_ECHO_GIC_INT);
     mcu_printf("[HCSR04] GIC_IntSrcEn(EXT0) ret=%d (expect 0=OK)\r\n", (int)ret);
 
-    mcu_printf("[HCSR04] Init done. TRIG=GPA(21), ECHO=GPA(22)\r\n");
+    mcu_printf("[HCSR04] Init done. TRIG=GPA(0), ECHO=GPA(1)\r\n");
 }
 
 /* -----------------------------------------------------------------------
@@ -224,7 +222,7 @@ void Hcsr04_CollisionAvoidTask(void *pArg)
                     isCollisionActive = TRUE;
                     mcu_printf("[HCSR04] COLLISION WARNING! dist=%d cm\r\n",
                                (int)distanceCm);
-                }
+                } 
             }
             else
             {
@@ -235,13 +233,15 @@ void Hcsr04_CollisionAvoidTask(void *pArg)
                     msg[1] = 0U;
                     (void)xQueueSend(xQ_Emer, msg, 0);
                     isCollisionActive = FALSE;
+                    mcu_printf("[HCSR04] Dismiss. dist=%d cm\r\n",
+                               (int)distanceCm);
                 }
             }
         }
         else
         {
             /* timeout: 센서 무응답 — 로그만 남기고 계속 */
-            mcu_printf("[HCSR04] Echo timeout (no object or >400cm)\r\n");
+            // mcu_printf("[HCSR04] Echo timeout (no object or >400cm)\r\n");
         }
 
         /* 5. 다음 주기까지 대기 (60ms - 이미 소비한 Echo 대기 시간 포함) */
