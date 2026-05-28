@@ -44,6 +44,7 @@
 	#include <gpio_ctrl.h>
 	#include <pdm_ctrl.h>
 	#include <i2c_ctrl.h>
+    #include <hcsr04.h>
 #endif  // ( MCU_BSP_SUPPORT_CAN_DEMO == 1 )
 
 #if ( MCU_BSP_SUPPORT_APP_IDLE == 1 )
@@ -384,6 +385,10 @@ void VCP_CreateApp(void)
     static uint32 uiFuelID;
     static uint32 uiFuelStk[VCP_LCD_STK_SIZE];
 
+    // (8) HC-SR04 Collision Avoidance Task
+    static uint32 uiHcsr04ID;
+    static uint32 uiHcsr04Stk[VCP_CTRL_STK_SIZE];
+
 
     /* 3. SAL_TaskCreate를 이용한 Task 생성 */
 
@@ -414,6 +419,10 @@ void VCP_CreateApp(void)
     // [Fuel Level]
     (void)SAL_TaskCreate(&uiFuelID, (const uint8 *)"VCP Fuel", (SALTaskFunc)&FuelLevelTask,
                          &uiFuelStk[0], VCP_LCD_STK_SIZE, SAL_PRIO_APP_CFG, NULL);
+
+    // [Collision Avoidance]                         
+    (void)SAL_TaskCreate(&uiHcsr04ID, (const uint8 *)"VCP HCSR04", (SALTaskFunc)&Hcsr04_CollisionAvoidTask,
+                         &uiHcsr04Stk[0], VCP_CTRL_STK_SIZE, SAL_PRIO_APP_CFG, NULL);                         
 }
 
 #endif  // ( MCU_BSP_SUPPORT_APP_BASE == 1 )

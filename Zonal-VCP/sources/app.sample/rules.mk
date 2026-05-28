@@ -196,3 +196,8 @@ endif
 ifeq ($(APLT_APP_LINUX_SUPPORT_SPI_DEMO), 1)
     include $(MCU_BSP_APP_SAMPLE_PATH)/app.spi.eccp/rules.mk
 endif
+
+# HCSR04 Application
+ifeq ($(MCU_BSP_BUILD_FLAGS_HCSR04), 1)
+    include $(MCU_BSP_APP_SAMPLE_PATH)/app.hcsr04/rules.mk
+endif

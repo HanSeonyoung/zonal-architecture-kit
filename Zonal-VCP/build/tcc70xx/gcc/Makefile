@@ -106,6 +106,7 @@ MCU_BSP_BUILD_FLAGS_APP_IPERF               ?= 1
 MCU_BSP_BUILD_FLAGS_APP_KEY_DEMO            ?= 0
 MCU_BSP_BUILD_FLAGS_APP_KEY                 ?= 0
 MCU_BSP_BUILD_FLAGS_APP_SPI_LED             ?= 1
+MCU_BSP_BUILD_FLAGS_HCSR04                  ?= 1
 
 # Test Application Build Flags
 MCU_BSP_BUILD_FLAGS_TEST_APP_ADC            ?= 0
