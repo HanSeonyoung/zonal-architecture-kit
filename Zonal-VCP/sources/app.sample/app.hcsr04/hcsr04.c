@@ -233,15 +233,15 @@ void Hcsr04_CollisionAvoidTask(void *pArg)
                     msg[1] = 0U;
                     (void)xQueueSend(xQ_Emer, msg, 0);
                     isCollisionActive = FALSE;
-                    mcu_printf("[HCSR04] Dismiss. dist=%d cm\r\n",
-                               (int)distanceCm);
+                    mcu_printf("[HCSR04] Dismiss. dist=%d cm, active=%d\r\n",
+                            (int)distanceCm, (int)isCollisionActive);
                 }
             }
         }
         else
         {
             /* timeout: 센서 무응답 — 로그만 남기고 계속 */
-            // mcu_printf("[HCSR04] Echo timeout (no object or >400cm)\r\n");
+            mcu_printf("[HCSR04] Echo timeout (no object or >400cm)\r\n");
         }
 
         /* 5. 다음 주기까지 대기 (60ms - 이미 소비한 Echo 대기 시간 포함) */
